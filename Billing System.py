@@ -5,7 +5,8 @@ from tkinter import ttk
 fontL ='Times 18'        #font style for labels
 fontE ='Times 16'        #font style for entry wedget
 
-#Contains all form labels   
+#Contains all form labels  
+
 
 def labels(frameobject):
      
@@ -43,22 +44,59 @@ def labelUserData(frameName):
     q1=EmailId.get()
     q2=Label(buyerData,text=q1,font= fontL)
     q2.grid(row="0", column ="3",sticky =W ,pady =10 )
+def genrateBill():   #second window take user detail
+    global sec 
+    sec= Toplevel(window )
+    
+    sec.geometry("850x225")
+    global frame1
+    frame1=LabelFrame(sec  ,text="Customer  Details.. " , padx=10   )
+    frame1.pack(fill=BOTH , padx=10,pady =10)
+    
+    labels(frame1)
+    
+    nameBox=Entry(frame1,textvariable= Name ,font= fontE)
+    nameBox.grid(row="0" , column="1")
+    
+
+    emailBox=Entry(frame1 ,textvariable=EmailId ,font= fontE)
+    emailBox.grid(row="1" ,column="1")
+       
+    mobileBox=Entry(frame1,textvariable=mobno ,font= fontE)
+    mobileBox.grid(row="0" ,column ="3" )
+        
+    addressBox=Entry(frame1 ,textvariable=Address ,font= fontE)
+    addressBox.grid(row="1" ,column="3")
+
+    
+    items=Label(frame1, text="No Of Items" ,font= fontL)
+    items.grid(row =2 ,column =0 , padx=25 ,pady =(0,10))
+    
+    #slider which will take number of products as a input
+    
+    global itemBox
+    itemBox=Scale(frame1 ,from_ =1 ,to=100 ,orient =HORIZONTAL ,length =200 ,font= fontE)
+    itemBox.grid(row =2 ,column= 1 ,pady=(0,10))
+    
+    global ok
+    ok=Button(frame1,text="Ok" ,command=insertData ,padx=25 ,width =10, font= 'Times 12')   #button to insert items 
+    ok.grid(row=2,column=2 , pady=10,padx=(35,0) )
 
     
 def show(): #third window
     #Window that will show the data
-    temp=0
-    global itemsno
+    temp=0      #temp use to all condition for each row
     itemsno=itemBox.get()
     l= [[grid[i][j].get() for j in range(5)] for i in range(itemsno)]
     for i in range(itemsno):
         if l[i][0]=='' or l[i][1]=='' or l[i][2]=='' or l[i][0].isnumeric():
                 messagebox.showinfo('Alert','You miss somthing in row number {} .\n\t\tOr\n Make some mistake product name'.format(i+1) )
         elif l[i][2].isnumeric()==False:
-            messagebox.showinfo('Alert','Please enter correct price of product in row {}'.format(i+1))
+            messagebox.showinfo('Alert','Please enter correct price of product in row {}'.format(i+1))       
         else:
             temp+=1
-    if temp==itemsno:        
+    if temp==itemsno :
+        if len(op)==itemsno:
             showWin =Toplevel() 
             showWin.geometry('{}x{}'.format(showWin.winfo_screenwidth(),showWin.winfo_screenheight()))
             #this section only show the customer details
@@ -101,50 +139,23 @@ def show(): #third window
                                    values=(row[0], row[1], row[2] ,row[3],row[4]))
                 sno +=1
             my_treeview.pack(fill=BOTH ) 
-    #this section only show the custimer details
-
-def genrateBill():   #second window take user detail
-    global sec 
-    sec= Toplevel(window )
-    
-    sec.geometry("850x225")
-    global frame1
-    frame1=LabelFrame(sec  ,text="Customer  Details.. " , padx=10   )
-    frame1.pack(fill=BOTH , padx=10,pady =10)
-    
-    labels(frame1)
-    
-    nameBox=Entry(frame1,textvariable= Name ,font= fontE)
-    nameBox.grid(row="0" , column="1")
-    
-
-    emailBox=Entry(frame1 ,textvariable=EmailId ,font= fontE)
-    emailBox.grid(row="1" ,column="1")
-       
-    mobileBox=Entry(frame1,textvariable=mobno ,font= fontE)
-    mobileBox.grid(row="0" ,column ="3" )
-        
-    addressBox=Entry(frame1 ,textvariable=Address ,font= fontE)
-    addressBox.grid(row="1" ,column="3")
-
-    
-    items=Label(frame1, text="No Of Items" ,font= fontL)
-    items.grid(row =2 ,column =0 , padx=25 ,pady =(0,10))
-    
-    #slider which will take number of products as a input
-    
-    global itemBox
- 
-    itemBox=Scale(frame1 ,from_ =1 ,to=100 ,orient =HORIZONTAL ,length =200 ,font= fontE)
-    itemBox.grid(row =2 ,column= 1 ,pady=(0,10))
-    
-    global ok
-    ok=Button(frame1,text="Ok" ,command=insertData ,padx=25 ,width =10, font= 'Times 12')   #button to insert items 
-    ok.grid(row=2,column=2 , pady=10,padx=(35,0) )
+        else:
+                response=messagebox.showinfo('Alert','Please select price per 100g/1kg/1ps \n make choose in one click multiple click genrate error ')
+                frame.destroy()
+                print(op)
+                ok.config(state=NORMAL)    
+def drop(event):  
+    op.append(event)    
     
 def insertData():
     name=Name.get().strip()
     mobileno =mobno.get()
+    tor=[]                #this list is use to genrate variable class for dropdownbox
+    global c
+    c=itemBox.get()
+    for i in range(c):
+        tor.append(i)
+        tor[i]=IntVar()
     if(len(name) <= 2):
         messagebox.showwarning("Alert" ,"Please Enter Valid Name")
     
@@ -153,8 +164,7 @@ def insertData():
             ok.config(state=DISABLED)  #config() to change coniguration of ok button to Disable ok button of frame1
             sec.geometry('{}x{}'.format(sec.winfo_screenwidth(),sec.winfo_screenheight())) #create window of monitor size
             
-            c=itemBox.get()
-
+            global frame
             frame=LabelFrame(sec  ,text="products Details.. " ) #Box inner padding
             frame.pack(padx=10 ,pady= 20 ,fill=BOTH ,expand=1)
 
@@ -168,6 +178,7 @@ def insertData():
 
             my_canvas.configure(yscrollcommand=scroll.set)
             my_canvas.bind('<Configure>',lambda e: my_canvas.configure(scrollregion=my_canvas.bbox("all")))
+            
             second_frame=Frame(my_canvas)
 
             my_canvas.create_window((0,0) ,window= second_frame )
@@ -177,40 +188,45 @@ def insertData():
             sn0=Label(second_frame ,text ="S.No",font='Times 12 bold').grid(row =0 ,column= 0)
             product=Label(second_frame  ,text="Product Name",font='Times 12 bold').grid(row=0 ,column=1)
             quantity=Label(second_frame , text="Quantity \n (eg:1gm,1kg,1ps)",font='Times 12 bold').grid(row=0,column=2)
-            price =Label(second_frame , text="Price \n (per" ,font='Times 12 bold').grid(row =0 ,column=3)
-            discount =Label(second_frame , text="Discount",font='Times 12 bold').grid(row=0 ,column=4)
-            tax =Label(second_frame , text="Tax( in %)" ,font='Times 12 bold').grid(row=0 ,column=5)
+            price =Label(second_frame , text="Price \n " ,font='Times 12 bold').grid(row =0 ,column=3)
+            pricePer  =Label(second_frame , text="Per \n 100g/1kg/1ps" ,font='Times 12 bold').grid(row =0 ,column=4)
+
+            discount =Label(second_frame , text="Discount",font='Times 12 bold').grid(row=0 ,column=5)
+            tax =Label(second_frame , text="Tax( in %)" ,font='Times 12 bold').grid(row=0 ,column=6)
             
             global grid
             grid=[]
-
             # Align Entry wedget in grid fashion
-
+            global op 
+            op=[]            #this list contains dropdownbox choice
             for i in range(c):
                 grid.append([])
-
-                for j in range(5):
+                for j in range(6):
 
                     #This x label object will print serial no before each row . 
-
+                    
                     x=Label(second_frame ,text=i+1,font='Times 12 bold',padx="5").grid(row=i+1 ,column=0 )  
-
-                    emailBox=Entry(second_frame ,width=30 )
-                    emailBox.grid(row=i+1 ,column=j+1 , pady=5,padx=5   )
-                    grid[i].append(emailBox)  
+                    
+                    if j==3:
+                        tor[i].set('Choose')
+                        dropbox=OptionMenu(second_frame,tor[i] ,'per 100g','per 1kg','per 1ps', command=drop).grid(row=i+1,column=j+1,pady=5,padx=5 )
+                    else:
+                        emailBox=Entry(second_frame ,width=30 )
+                        emailBox.grid(row=i+1 ,column=j+1 , pady=5,padx=5   )
+                        grid[i].append(emailBox)  
             genrate=Button(second_frame,text="Genrate Bill" ,command =show ,padx=5 ,width =20)   #button to insert items 
             genrate.grid(row=c+1,column= 3, pady=15,padx=15 )
             
     else:
         messagebox.showwarning("Alert" ,"Oops you enter wrong mobile number")
-
+        
     
-window= Tk()                             # Main window of application
+window= Tk() # Main window of application
+
 Name=StringVar()
 mobno=StringVar()
 Address=StringVar()
 EmailId=StringVar()
-p=IntVar()
 
 window.geometry("400x200")
 window.title("Billing System")
