@@ -1,4 +1,4 @@
-## from tkinter import *
+from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 
@@ -6,8 +6,227 @@ fontL ='Times 18'        #font style for labels
 fontE ='Times 16'        #font style for entry wedget
 
 #Contains all form labels  
+def dropM(event):
+     return(event)
 
+def addrecord():
+    pass
 
+def modifies():
+    mdlist=[i.get() for i in mod]
+    
+    if mdlist[0].isnumeric():
+        i=int(mdlist[0]) -1
+        if i<=itemBox.get()-1 and i+1>0:
+            l[i][0]=mdlist[1]
+            l[i][1]=mdlist[2]
+            l[i][2]=mdlist[3]
+            l[i][3]=mdlist[4]
+            l[i][4]=mdlist[5]
+            try:
+            
+                r=[dropMod.get()]
+                if r[0] =='Choose':
+                        messagebox.showinfo("Alert","Please select price at  quantity")
+                elif l[i][0]=='' or l[i][1]=='' or l[i][2]=='' or l[i][0].isnumeric():
+                        messagebox.showinfo('Alert','You miss somthing in row number {} .\n\t\tOr\n Make some mistake product name'.format(i+1) )
+                elif float(l[i][2]) <0:
+                        messagebox.showinfo('Alert','Please enter correct price of product in row {}'.format(i+1))       
+                elif l[i][1][-2:] not in ['kg','gm','ps']:
+                        messagebox.showinfo("Alert",'Please add unit of quantity you want to buy in row {}'.format(i+1))
+                elif r[0]=='per 1ps' and l[i][1][-2:] in ['kg','gm'] or l[i][1][-2:]=='ps' and r[0] in ['per 1kg','per 100g'] :
+                        messagebox.showinfo('Alert','oops.. you select wrong combintion of quantity and price per unit')
+                elif l[i][1][:-2] =='':
+                        messagebox.showinfo('Alert','please assign quantity in digit also \n(example  12kg)')
+                elif  float(l[i][1][:-2]) <=  0 :
+                        messagebox.showinfo('Alert' ,'Please check quantity nigther 0 nor negative in row {}'.format(i+1))
+                elif  float(l[i][3]) < 0 or float(l[i][4]) <0:
+                        messagebox.showinfo('Alert' ,'You enter invalid discount and tax %')
+                else:
+                        updatetotal=checkerrors(0,1,r)
+                        my_treeview.item(i,text=i+1,values=(l[i][0],l[i][1],str(l[i][2])+" "+r[0],l[i][3],l[i][4],updatetotal[0]))
+            except : 
+                messagebox.showinfo('Alert' ,'Please enter valid value of quantity in row \n or \t \t \n You enter wrong amount \n or \n You enter invalid discount and tax in row no{} ')
+        else:
+            messagebox.showinfo('Alert','Please enter correct serial number')
+    else:
+        messagebox.showinfo('Alert','please enter serial number in digits')
+def checkerrors(intialval ,lastval ,f): #This funtion simply calculate total price of the productand return list of total value of every product
+            u=intialval
+            totalprs=[]
+            endval=lastval
+            tmpl=f
+            while u<endval:
+                actualprice=0
+                pricepergram=0 
+                #if no discount and no tax
+                if l[u][3]=='' and l[u][4]=='':    
+                    if l[u][1][-2:]=='kg':  
+                        if tmpl[u]=='per 1kg':
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =round(float(l[u][1][:-2])*pricepergram*1000,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 100g':
+                            pricepergram= float(l[u][2])/100
+                            actualprice =round(float(l[u][1][:-2])*pricepergram*1000,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                    elif l[u][1][-2:]=='gm':
+                        if tmpl[u]=='per 100g':
+                            pricepergram= float(l[u][2])/100
+                            actualprice =round(float(l[u][1][:-2])*pricepergram,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 1kg':
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =round(float(l[u][1][:-2])*pricepergram,2)
+                            totalprs.append(actualprice)
+                            u +=1
+                    elif l[u][1][-2:]=='ps':
+                        if tmpl[u]=='per 1ps':
+                            pricepergram= float(l[u][2])
+                            actualprice =round(int(l[u][1][:-2])*pricepergram,2)
+                            totalprs.append(actualprice)
+            # if thier is no tax on product
+            #discount apply on total price of product
+                elif l[u][4]=='':
+                    discount=0
+                    if l[u][1][-2:]=='kg':  
+                        if tmpl[u]=='per 1kg':
+                            discount= float(l[u][3])/100
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =float(l[u][1][:-2])*pricepergram*1000 -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 100g':
+                            discount= float(l[u][3])/100
+                            pricepergram= float(l[u][2])/100
+                            actualprice =float(l[u][1][:-2])*pricepergram*1000 -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                    elif l[u][1][-2:]=='gm':
+                        if tmpl[u]=='per 100g':
+                            discount= float(l[u][3])/100
+                            pricepergram= float(l[u][2])/100
+                            actualprice =float(l[u][1][:-2])*pricepergram -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 1kg':
+                            discount= float(l[u][3])/100
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =float(l[u][1][:-2])*pricepergram -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1
+                    elif l[u][1][-2:]=='ps':
+                        if tmpl[u]=='per 1ps':
+                            discount= float(l[u][3])/100
+                            pricepergram= float(l[u][2])
+                            actualprice =int(l[u][1][:-2])*pricepergram -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1
+                elif l[u][3]=='':
+                    tax=0
+                    if l[u][1][-2:]=='kg':  
+                        if tmpl[u]=='per 1kg':
+                            tax= float(l[u][4])/100
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 100g':
+                            tax= float(l[u][4])/100
+                            pricepergram= float(l[u][2])/100
+                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                    elif l[u][1][-2:]=='gm':
+                        if tmpl[u]=='per 100g':
+                            tax= float(l[u][4])/100
+                            pricepergram= float(l[u][2])/100
+                            actualprice =float(l[u][1][:-2])*pricepergram  +tax
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 1kg':
+                            tax= float(l[u][4])/100
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =float(l[u][1][:-2])*pricepergram +tax
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1
+                    elif l[u][1][-2:]=='ps':
+                        if tmpl[u]=='per 1ps':
+                            tax= float(l[u][4])/100
+                            pricepergram= float(l[u][2])
+                            actualprice =int(l[u][1][:-2])*pricepergram  +tax
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1
+                else: 
+                    tax=0
+                    discount =0
+                    if l[u][1][-2:]=='kg':  
+                        if tmpl[u]=='per 1kg':
+                            tax= float(l[u][4])/100
+                            discount=float(l[u][3])/100
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 100g':
+                            tax= float(l[u][4])/100
+                            discount=float(l[u][3])/100
+                            pricepergram= float(l[u][2])/100
+                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                    elif l[u][1][-2:]=='gm':
+                        if tmpl[u]=='per 100g':
+                            tax= float(l[u][4])/100
+                            discount=float(l[u][3])/100
+                            pricepergram= float(l[u][2])/100
+                            actualprice =float(l[u][1][:-2])*pricepergram  +tax -discount 
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1 
+                        elif tmpl[u]=='per 1kg':
+                            tax= float(l[u][4])/100
+                            discount=float(l[u][3])/100
+                            pricepergram= float(l[u][2])/1000
+                            actualprice =float(l[u][1][:-2])*pricepergram +tax -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1
+                    elif l[u][1][-2:]=='ps':
+                        if tmpl[u]=='per 1ps':
+                            tax= float(l[u][4])/100
+                            discount=float(l[u][3])/100
+                            pricepergram= float(l[u][2])
+                            actualprice =int(l[u][1][:-2])*pricepergram  +tax -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            u +=1
+            return(totalprs)
+def columnName(frameName):
+    frame=frameName
+    sn0=Label(frame ,text ="S.No",font='Times 12 bold').grid(row =0 ,column= 0)
+    product=Label(frame  ,text="Product Name",font='Times 12 bold').grid(row=0 ,column=1)
+    quantity=Label(frame , text="Quantity \n (eg:1gm,1kg,1ps)",font='Times 12 bold').grid(row=0,column=2)
+    price =Label(frame , text="Price \n " ,font='Times 12 bold').grid(row =0 ,column=3)
+    pricePer  =Label(frame , text="Per \n 100g/1kg/1ps" ,font='Times 12 bold').grid(row =0 ,column=4)
+
+    discount =Label(frame , text="Discount in %",font='Times 12 bold').grid(row=0 ,column=5)
+    tax =Label(frame , text="Tax in %" ,font='Times 12 bold').grid(row=0 ,column=6)
 def labels(frameobject):
      
     frame=frameobject
@@ -81,13 +300,11 @@ def genrateBill():   #second window take user detail
     global ok
     ok=Button(frame1,text="Ok" ,command=insertData ,padx=25 ,width =10, font= 'Times 12')   #button to insert items 
     ok.grid(row=2,column=2 , pady=10,padx=(35,0) )
-#def thirdwin(itemsno):
-
-    
 def show(): #third window
     #Window that will show the data
     temp=0      #temp use to all condition for each row
     itemsno=itemBox.get()
+    global l
     l= [[grid[i][j].get() for j in range(5)] for i in range(itemsno)]
     try:
         for i in range(itemsno):
@@ -97,7 +314,7 @@ def show(): #third window
                 messagebox.showinfo('Alert','Please enter correct price of product in row {}'.format(i+1))       
             elif l[i][1][-2:] not in ['kg','gm','ps']:
                 messagebox.showinfo("Alert",'Please add unit of quantity you want to buy in row {}'.format(i+1))
-            elif op[i]=='per 1ps' and l[i][1][-2:] in ['kg','gm']:
+            elif op[i]=='per 1ps' and l[i][1][-2:] in ['kg','gm'] or l[i][1][-2:]=='ps' and op[i] in ['per 1kg','per 100g'] :
                 messagebox.showinfo('Alert','oops.. you select wrong combintion of quantity and price per unit')
                 frame.destroy()
                 ok.config(state=NORMAL)
@@ -116,176 +333,8 @@ def show(): #third window
             messagebox.showinfo('Alert' ,'Please enter valid value of quantity in row \n or \t \t \n You enter wrong amount \n or \n You enter invalid discount and tax in row no{} '.format(i+1))
         
     if temp==itemsno :
-        if len(op)==itemsno: 
-            u=0
-            totalprs=[]
-            
-            while u<itemsno:
-                actualprice=0
-                pricepergram=0 
-                #if no discount and no tax
-                if l[u][3]=='' and l[u][4]=='':    
-                    if l[u][1][-2:]=='kg':  
-                        if op[u]=='per 1kg':
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =round(float(l[u][1][:-2])*pricepergram*1000,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 100g':
-                            pricepergram= float(l[u][2])/100
-                            actualprice =round(float(l[u][1][:-2])*pricepergram*1000,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                    elif l[u][1][-2:]=='gm':
-                        if op[u]=='per 100g':
-                            pricepergram= float(l[u][2])/100
-                            actualprice =round(float(l[u][1][:-2])*pricepergram,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 1kg':
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =round(float(l[u][1][:-2])*pricepergram,2)
-                            totalprs.append(actualprice)
-                            u +=1
-                    elif l[u][1][-2:]=='ps':
-                        if op[u]=='per 1ps':
-                            pricepergram= float(l[u][2])
-                            actualprice =round(int(l[u][1][:-2])*pricepergram,2)
-                            totalprs.append(actualprice)
-            # if thier is no tax on product
-            #discount apply on total price of product
-                elif l[u][4]=='':
-                    discount=0
-                    if l[u][1][-2:]=='kg':  
-                        if op[u]=='per 1kg':
-                            discount= float(l[u][3])/100
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =float(l[u][1][:-2])*pricepergram*1000 -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 100g':
-                            discount= float(l[u][3])/100
-                            pricepergram= float(l[u][2])/100
-                            actualprice =float(l[u][1][:-2])*pricepergram*1000 -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                    elif l[u][1][-2:]=='gm':
-                        if op[u]=='per 100g':
-                            discount= float(l[u][3])/100
-                            pricepergram= float(l[u][2])/100
-                            actualprice =float(l[u][1][:-2])*pricepergram -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 1kg':
-                            discount= float(l[u][3])/100
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =float(l[u][1][:-2])*pricepergram -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1
-                    elif l[u][1][-2:]=='ps':
-                        if op[u]=='per 1ps':
-                            discount= float(l[u][3])/100
-                            pricepergram= float(l[u][2])
-                            actualprice =int(l[u][1][:-2])*pricepergram -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1
-                elif l[u][3]=='':
-                    tax=0
-                    if l[u][1][-2:]=='kg':  
-                        if op[u]=='per 1kg':
-                            tax= float(l[u][4])/100
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 100g':
-                            tax= float(l[u][4])/100
-                            pricepergram= float(l[u][2])/100
-                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                    elif l[u][1][-2:]=='gm':
-                        if op[u]=='per 100g':
-                            tax= float(l[u][4])/100
-                            pricepergram= float(l[u][2])/100
-                            actualprice =float(l[u][1][:-2])*pricepergram  +tax
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 1kg':
-                            tax= float(l[u][4])/100
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =float(l[u][1][:-2])*pricepergram +tax
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1
-                    elif l[u][1][-2:]=='ps':
-                        if op[u]=='per 1ps':
-                            tax= float(l[u][4])/100
-                            pricepergram= float(l[u][2])
-                            actualprice =int(l[u][1][:-2])*pricepergram  +tax
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1
-                else: 
-                    tax=0
-                    discount =0
-                    if l[u][1][-2:]=='kg':  
-                        if op[u]=='per 1kg':
-                            tax= float(l[u][4])/100
-                            discount=float(l[u][3])/100
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 100g':
-                            tax= float(l[u][4])/100
-                            discount=float(l[u][3])/100
-                            pricepergram= float(l[u][2])/100
-                            actualprice =float(l[u][1][:-2])*pricepergram*1000 +tax -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                    elif l[u][1][-2:]=='gm':
-                        if op[u]=='per 100g':
-                            tax= float(l[u][4])/100
-                            discount=float(l[u][3])/100
-                            pricepergram= float(l[u][2])/100
-                            actualprice =float(l[u][1][:-2])*pricepergram  +tax -discount 
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1 
-                        elif op[u]=='per 1kg':
-                            tax= float(l[u][4])/100
-                            discount=float(l[u][3])/100
-                            pricepergram= float(l[u][2])/1000
-                            actualprice =float(l[u][1][:-2])*pricepergram +tax -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1
-                    elif l[u][1][-2:]=='ps':
-                        if op[u]=='per 1ps':
-                            tax= float(l[u][4])/100
-                            discount=float(l[u][3])/100
-                            pricepergram= float(l[u][2])
-                            actualprice =int(l[u][1][:-2])*pricepergram  +tax -discount
-                            actualprice=round(actualprice,2)
-                            totalprs.append(actualprice)
-                            u +=1
-                    
-                    
-                        
-                            
-                            
-           
+        if len(op)==itemsno:
+            total=checkerrors(0,itemsno,op)   #Return list of total values
             showWin =Toplevel() 
             showWin.geometry('{}x{}'.format(showWin.winfo_screenwidth(),showWin.winfo_screenheight()))
                     #this section only show the customer details
@@ -297,12 +346,19 @@ def show(): #third window
             labelUserData(buyerData)   #Call fuction that display user data enter in entry wedget
 
             productData=LabelFrame(showWin ,text="Product Details..")
-            productData.pack(fill=BOTH ,pady=10 ,padx=10)
-
-            my_treeview =ttk.Treeview(productData )
+            productData.pack(fill=X,pady=10 ,padx=10) 
+            
+            scrollbar= Scrollbar(productData) 
+            scrollbar.pack(side=RIGHT ,fill=Y)
+            
+            global my_treeview
+            my_treeview =ttk.Treeview(productData ,yscrollcommand=scrollbar.set )
+            my_treeview.pack(fill=BOTH ) 
+            
+            scrollbar.config(command=my_treeview.yview)
                     #define columns 
             my_treeview['columns'] =('Product Name','Quantity','Price', 'Discount','Tax','Total')
-                    #formatting the tree
+                    #formatting t tree
 
             my_treeview.column('#0',width=10,anchor=W)     #Phantom column(extra column)
             my_treeview.column('Product Name' ,width=75,anchor=W)  
@@ -325,16 +381,35 @@ def show(): #third window
             for i in range(ps):
 
                     my_treeview.insert(parent='' ,index='end',iid = i, text=sno ,
-                                    values=(l[i][0], l[i][1], str(l[i][2])+" "+op[i] ,l[i][3],l[i][4] ,totalprs[i]))
+                                    values=(l[i][0], l[i][1], str(l[i][2])+" "+op[i] ,l[i][3],l[i][4] ,total[i]))
                     sno +=1
-            my_treeview.pack(fill=BOTH ) 
-   
+            
+            modification=LabelFrame(showWin,text='Modification Section..')
+            modification.pack(pady=10 ,padx=10) 
+
+            
+            columnName(modification) #display labels of product details
+            global mod
+            mod =[]
+            for x in range (7):   
+                if x==4 :
+                    dropMod.set('Choose')
+                    drop=OptionMenu(modification ,dropMod,'per 100g','per 1kg','per 1ps',command=dropM)
+                    drop.grid(row=1 ,column =4)
+                    
+                else :    
+                    entry1= Entry(modification,width=30 )
+                    entry1.grid(row=1 ,column=x , pady=5,padx=5)
+                    mod.append(entry1)
+            addRecord=Button(modification ,text='Add Record' ,command=addrecord).grid(row=2 ,column =2)
+            modify= Button(modification ,text="Modify It" ,command = modifies)
+            modify.grid(row=2 ,column =3)
+        else:
+            response=messagebox.showinfo('Alert','Please select price per 100g/1kg/1ps \n make choose in one click multiple click genrate error ')
+            frame.destroy()
+            ok.config(state=NORMAL)
                        
                     
-        else:
-                    response=messagebox.showinfo('Alert','Please select price per 100g/1kg/1ps \n make choose in one click multiple click genrate error ')
-                    frame.destroy()
-                    ok.config(state=NORMAL)    
 def drop(event):  
     op.append(event)    
     
@@ -376,14 +451,7 @@ def insertData():
 
             # Heading of the table field 
 
-            sn0=Label(second_frame ,text ="S.No",font='Times 12 bold').grid(row =0 ,column= 0)
-            product=Label(second_frame  ,text="Product Name",font='Times 12 bold').grid(row=0 ,column=1)
-            quantity=Label(second_frame , text="Quantity \n (eg:1gm,1kg,1ps)",font='Times 12 bold').grid(row=0,column=2)
-            price =Label(second_frame , text="Price \n " ,font='Times 12 bold').grid(row =0 ,column=3)
-            pricePer  =Label(second_frame , text="Per \n 100g/1kg/1ps" ,font='Times 12 bold').grid(row =0 ,column=4)
-
-            discount =Label(second_frame , text="Discount",font='Times 12 bold').grid(row=0 ,column=5)
-            tax =Label(second_frame , text="Tax( in %)" ,font='Times 12 bold').grid(row=0 ,column=6)
+            columnName(second_frame)
             
             global grid
             grid=[]
@@ -412,12 +480,13 @@ def insertData():
         messagebox.showwarning("Alert" ,"Oops you enter wrong mobile number")
         
     
-window= Tk() # Main window of application
+window=Tk() # Main window of application
 
 Name=StringVar()
 mobno=StringVar()
 Address=StringVar()
 EmailId=StringVar()
+dropMod=StringVar()
 
 window.geometry("400x200")
 window.title("Billing System")
