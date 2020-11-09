@@ -3,62 +3,189 @@ from tkinter import messagebox
 from tkinter import ttk
 
 fontL ='Times 18'        #font style for labels
-fontE ='Times 16'        #font style for entry wedget
-
+fontE ='Times 16' #font style for entry wedget
 #Contains all form labels  
 def dropM(event):
      return(event)
+def validateAdd(ko):
+            global sno
+            global grandtotal
+            mdlist=ko
+            l.append(mdlist[1:])
 
-def addrecord():
-    pass
-
-def modifies():
-    mdlist=[i.get() for i in mod]
-    
-    if mdlist[0].isnumeric():
-        i=int(mdlist[0]) -1
-        if i<=itemBox.get()-1 and i+1>0:
-            l[i][0]=mdlist[1]
-            l[i][1]=mdlist[2]
-            l[i][2]=mdlist[3]
-            l[i][3]=mdlist[4]
-            l[i][4]=mdlist[5]
             try:
             
                 r=[dropMod.get()]
                 if r[0] =='Choose':
                         messagebox.showinfo("Alert","Please select price at  quantity")
-                elif l[i][0]=='' or l[i][1]=='' or l[i][2]=='' or l[i][0].isnumeric():
-                        messagebox.showinfo('Alert','You miss somthing in row number {} .\n\t\tOr\n Make some mistake product name'.format(i+1) )
-                elif float(l[i][2]) <0:
-                        messagebox.showinfo('Alert','Please enter correct price of product in row {}'.format(i+1))       
-                elif l[i][1][-2:] not in ['kg','gm','ps']:
-                        messagebox.showinfo("Alert",'Please add unit of quantity you want to buy in row {}'.format(i+1))
-                elif r[0]=='per 1ps' and l[i][1][-2:] in ['kg','gm'] or l[i][1][-2:]=='ps' and r[0] in ['per 1kg','per 100g'] :
+                elif l[-1][0]=='' or l[-1][1]=='' or l[-1][2]=='' or l[-1][0].isnumeric():
+                        messagebox.showinfo('Alert','Either you miss somthing Or make some mistake product name')
+                elif float(l[-1][2]) <0:
+                        messagebox.showinfo('Alert','Please enter correct price of product')       
+                elif l[-1][1][-2:] not in ['kg','gm','ps']:
+                        messagebox.showinfo("Alert",'Please add unit of quantity you want to buy')
+                elif r[0]=='per 1ps' and l[-1][1][-2:] in ['kg','gm'] or l[-1][1][-2:]=='ps' and r[0] in ['per 1kg','per 100g'] :
                         messagebox.showinfo('Alert','oops.. you select wrong combintion of quantity and price per unit')
-                elif l[i][1][:-2] =='':
+                elif l[-1][1][:-2] =='':
                         messagebox.showinfo('Alert','please assign quantity in digit also \n(example  12kg)')
-                elif  float(l[i][1][:-2]) <=  0 :
-                        messagebox.showinfo('Alert' ,'Please check quantity nigther 0 nor negative in row {}'.format(i+1))
-                elif  float(l[i][3]) < 0 or float(l[i][4]) <0:
+                elif  float(l[-1][1][:-2]) <=  0 :
+                        messagebox.showinfo('Alert' ,'Please check quantity nigther 0 nor negative')
+                elif  float(l[-1][3]) < 0 or float(l[-1][4]) <0:
                         messagebox.showinfo('Alert' ,'You enter invalid discount and tax %')
-                else:
-                        updatetotal=checkerrors(0,1,r)
-                        my_treeview.item(i,text=i+1,values=(l[i][0],l[i][1],str(l[i][2])+" "+r[0],l[i][3],l[i][4],updatetotal[0]))
+                else: 
+                        global extraitem
+                        extraitem=[]
+                        extraitem.append(sno)
+                        updatetotal=modifyTotal(-1,0,r)
+                        grandtotal=grandtotal + updatetotal[0]
+                        my_treeview.delete('101')
+                        my_treeview.insert(parent='' ,index='end', iid=sno,text=sno+1,values =(l[-1][0],l[-1][1],str(l[-1][2])+" "+r[0],l[-1][3],l[-1][4],updatetotal[0]))
+                        sno +=1
+                        my_treeview.insert(parent='', index='end' ,iid=101,text='',value=('','','','','Grand Total', grandtotal))
             except : 
-                messagebox.showinfo('Alert' ,'Please enter valid value of quantity in row \n or \t \t \n You enter wrong amount \n or \n You enter invalid discount and tax in row no{} ')
+                messagebox.showinfo('Alert' ,'Please enter valid value of quantity in row \n or \t \t \n You enter wrong amount \n or \n You enter invalid discount and tax')
+
+
+def addrecord():
+    mdlist=[i.get() for i in mod]
+    nodublicate=0
+    dublicate=0 
+    for i in range(0,itemBox.get()):
+        if mdlist[1:]==l[i]:
+            dublicate +=1
+        else:
+            nodublicate +=1
+    if nodublicate== itemBox.get():
+        validateAdd(mdlist)
+    else:        
+            option=messagebox.askyesno("Warning",'the entered details are already exist do you add the same record one more time or not ?')
+            if option==True:
+                validateAdd(mdlist)
+            else:
+                entry1.delete(0,END)
+def validateModify(extralist,x):
+    mdlist=extralist
+    i=x
+    global grandtotal
+    l[i][0]=mdlist[1]
+    l[i][1]=mdlist[2]
+    l[i][2]=mdlist[3]
+    l[i][3]=mdlist[4]
+    l[i][4]=mdlist[5]
+    try:
+            
+        r=[dropMod.get()]
+        if r[0] =='Choose':
+                messagebox.showinfo("Alert","Please select price at  quantity")
+        elif l[i][0]=='' or l[i][1]=='' or l[i][2]=='' or l[i][0].isnumeric():
+                 messagebox.showinfo('Alert','Either you miss somthing Or make some mistake product name')
+        elif float(l[i][2]) <0:
+                messagebox.showinfo('Alert','Please enter correct price of product')       
+        elif l[i][1][-2:] not in ['kg','gm','ps']:
+                messagebox.showinfo("Alert",'Please add unit of quantity you want to buy')
+        elif r[0]=='per 1ps' and l[i][1][-2:] in ['kg','gm'] or l[i][1][-2:]=='ps' and r[0] in ['per 1kg','per 100g'] :
+                messagebox.showinfo('Alert','oops.. you select wrong combintion of quantity and price per unit')
+        elif l[i][1][:-2] =='':
+                messagebox.showinfo('Alert','please assign quantity in digit also \n(example  12kg)')
+        elif  float(l[i][1][:-2]) <=  0 :
+                messagebox.showinfo('Alert' ,'Please check quantity nigther 0 nor negative')
+        elif  float(l[i][3]) < 0 or float(l[i][4]) <0:
+                messagebox.showinfo('Alert' ,'You enter invalid discount and tax %')
+        else:
+               
+                pricetotal=my_treeview.item(i,'values')
+                grandtotal = grandtotal -float(pricetotal[5])
+                updatetotal=modifyTotal(i,i+1,r)
+                grandtotal =grandtotal + updatetotal[0]
+                my_treeview.item(i,text=i+1,values=(l[i][0],l[i][1],str(l[i][2])+" "+r[0],l[i][3],l[i][4],updatetotal[0]))
+                my_treeview.item(101,text='',value=('','','','','Grand Total', grandtotal))
+                        
+    except : 
+        messagebox.showinfo('Alert' ,'Please enter valid value of quantity in row \n or \t \t \n You enter wrong amount \n or \n You enter invalid discount and tax in row no{} ')
+
+                
+def modifies():
+    mdlist=[i.get() for i in mod]
+    
+    if mdlist[0].isnumeric():
+        i=int(mdlist[0]) -1          #serial which user want to modify 
+        if i<=itemBox.get()-1 and i+1>0:
+            validateModify(mdlist,i)
+        elif i in extraitem:
+            print(i)
+            validateModify(mdlist,i)
         else:
             messagebox.showinfo('Alert','Please enter correct serial number')
-    else:
-        messagebox.showinfo('Alert','please enter serial number in digits')
-def checkerrors(intialval ,lastval ,f): #This funtion simply calculate total price of the productand return list of total value of every product
+    #else:
+     #   messagebox.showinfo('Alert','please enter serial number in digits')
+def removeRecord():
+    selectedItems =my_treeview.selection()
+    temp=' '.join([str(int(y)+1) for y in selectedItems])
+    yesN0=messagebox.askyesno("Alert" ,'Selected serial numbers {} for removing form list'.format(temp))
+    if yesN0==True:
+        for item in selectedItems:
+            my_treeview.delete(item)
+            l.remove(l[int(item)])
+            op.remove(l[int(item)])
+def modifyTotal(intial,end,f): #This funtion simply calculate total price of the productand return list of total value of every product
+            u=intial
+            totalprs=[]
+            endval=end
+            tmpl=f
+            
+            for i in range(u,endval): 
+                #if no discount and no tax 
+                    if l[i][1][-2:]=='kg':  
+                        if tmpl[0]=='per 1kg':
+                            tax= float(l[i][4])/100
+                            discount=float(l[i][3])/100
+                            pricepergram= float(l[i][2])/1000
+                            actualprice =float(l[i][1][:-2])*pricepergram*1000 +tax -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+             
+                        elif tmpl[0]=='per 100g':
+                            tax= float(l[i][4])/100
+                            discount=float(l[i][3])/100
+                            pricepergram= float(l[i][2])/100
+                            actualprice =float(l[i][1][:-2])*pricepergram*1000 +tax -discount
+                         #   actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            
+                    elif l[i][1][-2:]=='gm':
+                        if tmpl[0]=='per 100g':
+                            tax= float(l[i][4])/100
+                            discount=float(l[i][3])/100
+                            pricepergram= float(l[i][2])/100
+                            actualprice =float(l[i][1][:-2])*pricepergram  +tax -discount 
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                        
+                        elif tmpl[0]=='per 1kg':
+                            tax= float(l[i][4])/100
+                            discount=float(l[i][3])/100
+                            pricepergram= float(l[i][2])/1000
+                            actualprice =float(l[i][1][:-2])*pricepergram +tax -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+                            
+                    elif l[i][1][-2:]=='ps':
+                        if tmpl[0]=='per 1ps':
+                            tax= float(l[i][4])/100
+                            discount=float(l[i][3])/100
+                            pricepergram= float(l[i][2])
+                            actualprice =int(l[i][1][:-2])*pricepergram  +tax -discount
+                            actualprice=round(actualprice,2)
+                            totalprs.append(actualprice)
+            return(totalprs)
+
+def calTotal(intialval ,lastval ,f): #This funtion simply calculate total price of the productand return list of total value of every product
             u=intialval
             totalprs=[]
             endval=lastval
             tmpl=f
-            while u<endval:
-                actualprice=0
-                pricepergram=0 
+            
+            while u<endval: 
                 #if no discount and no tax
                 if l[u][3]=='' and l[u][4]=='':    
                     if l[u][1][-2:]=='kg':  
@@ -91,7 +218,6 @@ def checkerrors(intialval ,lastval ,f): #This funtion simply calculate total pri
             # if thier is no tax on product
             #discount apply on total price of product
                 elif l[u][4]=='':
-                    discount=0
                     if l[u][1][-2:]=='kg':  
                         if tmpl[u]=='per 1kg':
                             discount= float(l[u][3])/100
@@ -171,8 +297,6 @@ def checkerrors(intialval ,lastval ,f): #This funtion simply calculate total pri
                             totalprs.append(actualprice)
                             u +=1
                 else: 
-                    tax=0
-                    discount =0
                     if l[u][1][-2:]=='kg':  
                         if tmpl[u]=='per 1kg':
                             tax= float(l[u][4])/100
@@ -334,7 +458,8 @@ def show(): #third window
         
     if temp==itemsno :
         if len(op)==itemsno:
-            total=checkerrors(0,itemsno,op)   #Return list of total values
+            global total
+            total=calTotal(0,itemsno,op)   #Return list of total values
             showWin =Toplevel() 
             showWin.geometry('{}x{}'.format(showWin.winfo_screenwidth(),showWin.winfo_screenheight()))
                     #this section only show the customer details
@@ -377,13 +502,16 @@ def show(): #third window
             my_treeview.heading('Tax' ,text='Tax' ,anchor=W)
             my_treeview.heading('Total',text='Total' ,anchor=W)
             ps=itemsno
-            sno=1  #use to insert serial no in phantum column
+            global sno
+            sno=0
+            global grandtotal
+            grandtotal=0
             for i in range(ps):
-
-                    my_treeview.insert(parent='' ,index='end',iid = i, text=sno ,
+                    grandtotal= grandtotal +total[i]
+                    my_treeview.insert(parent='' ,index='end',iid = sno, text=i+1,
                                     values=(l[i][0], l[i][1], str(l[i][2])+" "+op[i] ,l[i][3],l[i][4] ,total[i]))
                     sno +=1
-            
+            my_treeview.insert(parent='', index='end' ,iid=101,text='',value=('','','','','Grand Total', grandtotal))
             modification=LabelFrame(showWin,text='Modification Section..')
             modification.pack(pady=10 ,padx=10) 
 
@@ -397,13 +525,16 @@ def show(): #third window
                     drop=OptionMenu(modification ,dropMod,'per 100g','per 1kg','per 1ps',command=dropM)
                     drop.grid(row=1 ,column =4)
                     
-                else :    
+                else :
+                    
                     entry1= Entry(modification,width=30 )
                     entry1.grid(row=1 ,column=x , pady=5,padx=5)
                     mod.append(entry1)
             addRecord=Button(modification ,text='Add Record' ,command=addrecord).grid(row=2 ,column =2)
             modify= Button(modification ,text="Modify It" ,command = modifies)
             modify.grid(row=2 ,column =3)
+            remove=Button(modification,text='Remove Record' ,command=removeRecord)
+            remove.grid(row=2,column =4)
         else:
             response=messagebox.showinfo('Alert','Please select price per 100g/1kg/1ps \n make choose in one click multiple click genrate error ')
             frame.destroy()
@@ -414,6 +545,7 @@ def drop(event):
     op.append(event)    
     
 def insertData():
+
     name=Name.get().strip()
     mobileno =mobno.get()
     tor=[]                #this list is use to genrate variable class for dropdownbox
@@ -487,6 +619,8 @@ mobno=StringVar()
 Address=StringVar()
 EmailId=StringVar()
 dropMod=StringVar()
+modifyentry=StringVar()
+
 
 window.geometry("400x200")
 window.title("Billing System")
