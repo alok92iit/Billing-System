@@ -1,10 +1,108 @@
+#creating the pdf
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Table
+from reportlab.platypus import SimpleDocTemplate
+def printpdf():
+    global l
+    global grandtotal
+    global total 
+    filename ='billpdf.pdf'
+    shopname='Shop Name'
+    slogan='Any slogan'
+    address1='Address line one'
+    address2 ="Adress line two "
+    shopmobile="96856xxx45"
+    consumerName="Name of consumer"
+    consumerMobile='886642655xx'
+    consumerEmailId="xyz@gmail.com"
+    conaddress1="consumer address line one"
+    conaddress2="consumer address line two"
+    pdf=canvas.Canvas(filename)
+    pdf.setFont('Helvetica-Bold',48)
+    pdf.setTitle("Invoice")
+
+    pdf.drawString(350,750,'INVOICE')
+    pdf.setFontSize(28)
+    pdf.drawString(50,740,shopname)
+    pdf.setFont('Times-Italic',18)
+    pdf.drawString(50,722,slogan)
+    pdf.setFont("Courier-Bold",12)
+    pdf.drawString(50,690,address1)
+    pdf.drawString(50,670,address2)
+    pdf.drawString(50,650,'Mobile number :'+shopmobile)
+
+    pdf.drawString(50,620,"Customer Name :"+consumerName)
+    pdf.drawString(50,600,'Mobile Number :'+consumerMobile)
+    pdf.drawString(50,580,'Email Id :'+consumerEmailId)
+    pdf.drawString(50,560,'Customer Address :'+conaddress1 )
+    pdf.drawString(175,545, conaddress2)
+
+    pdf.line(30,535,550,535)        #first horizontal line  
+    pdf.setFont("Courier-Bold",11)
+    pdf.drawString(30,520,"Sr.No.")
+    pdf.drawString(75,520,"Product Name")
+    pdf.drawString(200,520,"Quantity")
+    pdf.drawString(260,520,"Rate")
+    pdf.drawString(340,520,"Discount")
+    pdf.drawString(400,520,"Tax")
+    pdf.drawString(490,520,"Total")
+
+    pdf.line(30,515,550,515)        #second horizontal line 
+    pdf.line(73,535,73,150)         #first vertical line
+    pdf.line(198,535,198,150)       #second vertical line 
+    pdf.line(258,535,258,150)       #third vertical line
+    pdf.line(338,535,338,150)       #fourth vertical line
+    pdf.line(398,535,398,150)       #fivth vertical line 
+    pdf.line(488,535,488,150)       #sixth vertical line
+    pdf.line(30,150,550,150)        #third horizontal line
+    """
+    def rightalingn(pdf,string,left,right,ycoordinate):
+        length=len(string)
+        totalLength=(right-left)/7
+        print(totalLength)
+        spaces=int(totalLength-length)
+        print(spaces)
+        pdf.drawString(right,ycoordinate," "*spaces)
+        left=left+(7*spaces)
+        pdf.drawString(left,ycoordinate,string)
+    """
+    pdf.drawString(30,135,"Total Discount:")
+#    rightalingn(pdf,"-"+"%.2f" +" INR",393,488,135)
+    pdf.drawString(30,120,"Gross Total(Discount Included):")
+ #   rightalingn(pdf,"%.2f" +" INR",400,488,120)
+    pdf.drawString(30,105,"Tax:")
+  #  rightalingn(pdf,"+"+"%.2f" " INR",393,488,105)
+    pdf.line(30,100,550,100)
+    pdf.drawString(30,90,"Grand Total: ")
+   # rightalingn(pdf,"%.2f" +" INR",400,488,90)
+    pdf.drawString(400,50,"Authorized Signatory")
+    print("when pdf clic ",l)
+    print("totals list",total)
+    print("op list ",op)
+    #####################CUSTOMER DATA TO PRINT ON PDF ############################################
+    ycoordinate=500
+    for i in range(len(l)):
+        pdf.drawString(50,ycoordinate,str(i+1) )
+        pdf.drawString(80,ycoordinate,l[i][0] )
+        pdf.drawString(205,ycoordinate,l[i][1] )
+        pdf.drawString(262,ycoordinate,str(l[i][2])+' '+op[i]  )
+        pdf.drawString(345,ycoordinate,l[i][3] )
+        pdf.drawString(405,ycoordinate,l[i][3] )
+        pdf.drawString(495,ycoordinate,str(total[i]) )
+        ycoordinate=ycoordinate-15
+    pdf.drawString(495,90,str(grandtotal) )
+    pdf.save()
+
+
 fontL ='Times 18'        #font style for labels
 fontE ='Times 16' #font style for entry wedget
-#Contains all form labels  
+#Contains all form labels
+global extraitem
+extraitem=[]
 def dropM(event):
      return(event)
 def validateAdd(ko):
@@ -12,7 +110,7 @@ def validateAdd(ko):
             global grandtotal
             mdlist=ko
             l.append(mdlist[1:])
-
+            print("when add click", l)
             try:
             
                 r=[dropMod.get()]
@@ -33,10 +131,13 @@ def validateAdd(ko):
                 elif  float(l[-1][3]) < 0 or float(l[-1][4]) <0:
                         messagebox.showinfo('Alert' ,'You enter invalid discount and tax %')
                 else: 
-                        global extraitem
-                        extraitem=[]
+                        op.append(r[0])
+                        
                         extraitem.append(sno)
                         updatetotal=modifyTotal(-1,0,r)
+                        total.append(updatetotal[0])
+                        print("\n when add clicked total is ",total)
+                        print("\n when add clicked op is ",op)
                         grandtotal=grandtotal + updatetotal[0]
                         my_treeview.delete('101')
                         my_treeview.insert(parent='' ,index='end', iid=sno,text=sno+1,values =(l[-1][0],l[-1][1],str(l[-1][2])+" "+r[0],l[-1][3],l[-1][4],updatetotal[0]))
@@ -50,29 +151,37 @@ def addrecord():
     mdlist=[i.get() for i in mod]
     nodublicate=0
     dublicate=0 
-    for i in range(0,itemBox.get()):
+    loop=itemBox.get()
+    rmvitems= list(selectedItems)
+    itemSelected=0
+    
+    for i in range (len(rmvitems)):
+        if int(rmvitems[i]) in list(range(loop)):
+            itemSelected+=1   
+    for i in range(0,loop-itemSelected):
         if mdlist[1:]==l[i]:
-            dublicate +=1
+                dublicate +=1
         else:
-            nodublicate +=1
-    if nodublicate== itemBox.get():
+                nodublicate +=1
+    
+    if nodublicate== loop-itemSelected:
         validateAdd(mdlist)
     else:        
             option=messagebox.askyesno("Warning",'the entered details are already exist do you add the same record one more time or not ?')
             if option==True:
                 validateAdd(mdlist)
-            else:
-                entry1.delete(0,END)
-def validateModify(extralist,x):
-    mdlist=extralist
-    i=x
-    global grandtotal
-    l[i][0]=mdlist[1]
-    l[i][1]=mdlist[2]
-    l[i][2]=mdlist[3]
-    l[i][3]=mdlist[4]
-    l[i][4]=mdlist[5]
-    try:
+def validateModify(extralist,x ,iid):
+        mdlist=extralist
+        i=x
+        iidno =iid
+        global grandtotal
+        l[i][0]=mdlist[1]
+        l[i][1]=mdlist[2]
+        l[i][2]=mdlist[3]
+        l[i][3]=mdlist[4]
+        l[i][4]=mdlist[5]
+        print("when modify click",l)
+        #try:
             
         r=[dropMod.get()]
         if r[0] =='Choose':
@@ -83,7 +192,7 @@ def validateModify(extralist,x):
                 messagebox.showinfo('Alert','Please enter correct price of product')       
         elif l[i][1][-2:] not in ['kg','gm','ps']:
                 messagebox.showinfo("Alert",'Please add unit of quantity you want to buy')
-        elif r[0]=='per 1ps' and l[i][1][-2:] in ['kg','gm'] or l[i][1][-2:]=='ps' and r[0] in ['per 1kg','per 100g'] :
+        elif r[0]=='per 1ps' and l[i][1][-2:] in ['kg','gm+'] or l[i][1][-2:]=='ps' and r[0] in ['per 1kg','per 100g'] :
                 messagebox.showinfo('Alert','oops.. you select wrong combintion of quantity and price per unit')
         elif l[i][1][:-2] =='':
                 messagebox.showinfo('Alert','please assign quantity in digit also \n(example  12kg)')
@@ -92,41 +201,64 @@ def validateModify(extralist,x):
         elif  float(l[i][3]) < 0 or float(l[i][4]) <0:
                 messagebox.showinfo('Alert' ,'You enter invalid discount and tax %')
         else:
-               
-                pricetotal=my_treeview.item(i,'values')
+                
+                pricetotal=my_treeview.item(iidno,'values')
                 grandtotal = grandtotal -float(pricetotal[5])
                 updatetotal=modifyTotal(i,i+1,r)
+                total[i]=updatetotal[0]
+                print("total ",total)
+                op[i]=r[0]
                 grandtotal =grandtotal + updatetotal[0]
-                my_treeview.item(i,text=i+1,values=(l[i][0],l[i][1],str(l[i][2])+" "+r[0],l[i][3],l[i][4],updatetotal[0]))
+                my_treeview.item(iidno,text=iidno+1,values=(l[i][0],l[i][1],str(l[i][2])+" "+r[0],l[i][3],l[i][4],updatetotal[0]))
                 my_treeview.item(101,text='',value=('','','','','Grand Total', grandtotal))
                         
-    except : 
-        messagebox.showinfo('Alert' ,'Please enter valid value of quantity in row \n or \t \t \n You enter wrong amount \n or \n You enter invalid discount and tax in row no{} ')
+  #  except : 
+   #     messagebox.showinfo('Alert' ,'Please enter valid value of quantity in row \n or \t \t \n You enter wrong amount \n or \n You enter invalid discount and tax in row no{} ')
 
                 
 def modifies():
     mdlist=[i.get() for i in mod]
+    selectedItems =my_treeview.selection()
+#    if mdlist[0].isnumeric():
+    i=int(selectedItems[0])
+    indxPostion =my_treeview.index(i)
+    print("selected item to modifies",selectedItems)#serial which user want to modify 
+  #  if i<=itemBox.get()-1 and i+1>0:
+
+    print(i)
+    print(indxPostion)
     
-    if mdlist[0].isnumeric():
-        i=int(mdlist[0]) -1          #serial which user want to modify 
-        if i<=itemBox.get()-1 and i+1>0:
-            validateModify(mdlist,i)
-        elif i in extraitem:
-            print(i)
-            validateModify(mdlist,i)
-        else:
-            messagebox.showinfo('Alert','Please enter correct serial number')
+    validateModify(mdlist,indxPostion,i)
+   # elif i in extraitem:
+    
+    #    validateModify(mdlist,i)
+     #   else:
+      #      messagebox.showinfo('Alert','Please enter correct serial number')
     #else:
      #   messagebox.showinfo('Alert','please enter serial number in digits')
 def removeRecord():
-    selectedItems =my_treeview.selection()
-    temp=' '.join([str(int(y)+1) for y in selectedItems])
+    global grandtotal
+    global selectedItems
+    selectedItems =my_treeview.selection() # will select selected record selection() method will return tuple that contain iid no 
+                                        #in form of string
+    temp=' '.join([str(int(y)+1) for y in selectedItems]) # add 1 to see the serial number 
+
     yesN0=messagebox.askyesno("Alert" ,'Selected serial numbers {} for removing form list'.format(temp))
     if yesN0==True:
         for item in selectedItems:
+            indexpstnofItem =my_treeview.index(item)
+            pricetotal=my_treeview.item(item,'values')
             my_treeview.delete(item)
-            l.remove(l[int(item)])
-            op.remove(l[int(item)])
+            grandtotal = grandtotal -float(pricetotal[5])
+            print("the removed item is ",l[indexpstnofItem])
+            l.remove(l[indexpstnofItem])
+            op.remove(op[indexpstnofItem])
+            total.remove(total[indexpstnofItem])
+            
+        print("when remove click",l)
+        print('op list is',op)
+        
+        my_treeview.item(101,text='',value=('','','','','Grand Total', grandtotal))    
 def modifyTotal(intial,end,f): #This funtion simply calculate total price of the productand return list of total value of every product
             u=intial
             totalprs=[]
@@ -535,6 +667,8 @@ def show(): #third window
             modify.grid(row=2 ,column =3)
             remove=Button(modification,text='Remove Record' ,command=removeRecord)
             remove.grid(row=2,column =4)
+            createpdf=Button(modification,text='Genrate Invoice',command =printpdf)
+            createpdf.grid(row=3,column=0)
         else:
             response=messagebox.showinfo('Alert','Please select price per 100g/1kg/1ps \n make choose in one click multiple click genrate error ')
             frame.destroy()
